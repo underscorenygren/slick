@@ -1,0 +1,32 @@
+version: "3"
+
+volumes:
+  mysql-volume:
+
+services:
+  app:
+    image: underscorenygren/scraping:latest
+    build: .
+    command:
+      - main.py
+      - --forum
+    env_file:
+      - ./docker/env
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    links:
+      - mysql
+    volumes:
+      - .:/opt/
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=scraping
+    volumes:
+      - mysql-volume:/var/lib/mysql
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
