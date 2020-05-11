@@ -19,10 +19,8 @@ class GrandSpider(spider.DBMixin, scrapy.Spider):
 	# https://www.thegrandwhiskyauction.com/live-auction/page-3
 	start_urls = [
 		'https://www.thegrandwhiskyauction.com/live-auction',
-		#'https://www.thegrandwhiskyauction.com/april-2020',
-		#'https://www.thegrandwhiskyauction.com/february-2020',
-		#'https://www.thegrandwhiskyauction.com/january-2020',
-	]
+	] + \
+	[f'https://www.thegrandwhiskyauction.com/live-auction/page-{page}' for page in range(2, 30)]
 
 	def parse(self, response):
 		for item in items.grand_whisky_search_result(response):
@@ -44,8 +42,8 @@ class DekantaSpider(spider.DBMixin, scrapy.Spider):
 	# Todo 1 through 58
 	start_urls = [
 		'https://dekanta.com/store/?orderby=date',
-	] + [
-		f'https://dekanta.com/store/page/{page}?orderby=date' for page in range(2, 10)]
+	] + \
+	[f'https://dekanta.com/store/page/{page}?orderby=date' for page in range(2, 60)]
 
 	def parse(self, response):
 		for item in items.DekantaSearchResultItem.loads(response):

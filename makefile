@@ -52,7 +52,7 @@ recreate:  ## recreates DB tables
 	docker-compose run app cli.py recreate
 
 whisky:  ## runs whisky crawler
-	docker-compose run -v $(PWD)/credentials.json:/opt/credentials.json -v $(PWD)/token.pickle:/opt/token.pickle app whisky.py query --name Whisky --sheet '1rYKqYA67MpM2nY0T6pCTzDea6vM9fX1GJT3Iv3Ono14'
+	python whisky.py query --name Whisky --sheet $(SHEET_ID)
 
 ##@ Running
 
