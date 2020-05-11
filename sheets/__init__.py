@@ -75,10 +75,14 @@ def write_data(spreadsheet_id, data, title=None, creds=None, **kwargs):
 
 
 if __name__ == "__main__":
+	import sys
 	handler = logging.StreamHandler()
 	logger.addHandler(handler)
 
 	creds = parse_creds()
-	sheet_id = '1rYKqYA67MpM2nY0T6pCTzDea6vM9fX1GJT3Iv3Ono14'
+	sheet_id = sys.argv[1]
+	if not sheet_id:
+		print("myst provide sheet id as first arg")
+		sys.exit(1)
 	data = [('Col 1', 'Col 2'), ("column one", "column two")]
 	write_data(sheet_id, data, creds=creds)
