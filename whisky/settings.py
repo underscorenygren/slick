@@ -20,6 +20,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+		'whisky.pipeline.WhiskyItemPipeline': 200,
 		'slick.pipeline.DBPipeline': 300,
 }
 

@@ -16,14 +16,26 @@ urls = {
 	"unicode_developer": 'https://store.steampowered.com/developer/TUQUE',
 	"concurrent_players": 'https://steamcharts.com/app/320040',
 	"steam_charts_top": 'https://steamcharts.com/top',
+	"grand_item": 'https://www.thegrandwhiskyauction.com/lot-130107/macallan-easter-elchies-black-2019/auction-16',
 }
 
 if __name__ == "__main__":
+	import os
 	import requests
+	import argparse
+
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--missing', action="store_true", help="downloads only missing files")
+	args = parser.parse_args()
 
 	for name, url in urls.items():
-		with open(f'test/data/{name}.html', 'wb') as f:
-			print(f"getting {url}")
-			req = requests.get(url)
-			print(f"writing to {name}")
-			f.write(req.content)
+		path = f'test/data/{name}.html'
+		do_write = not args.missing or not os.path.exists(path)
+		if do_write:
+			with open(path, 'wb') as f:
+				print(f"getting {url}")
+				req = requests.get(url)
+				print(f"writing to {name}")
+				f.write(req.content)
+		else:
+			print(f"ignoring existing {name}")

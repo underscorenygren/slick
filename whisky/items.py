@@ -32,56 +32,68 @@ WhiskyItem = model.realize_item_class('WhiskyItem', models.Whisky)
 WhiskySearchResultItem = model.realize_item_class('WhiskySearchResultItem', models.WhiskySearchResult)
 
 
-def fill_item_from_name(item):
+def fill_item_from_name(_item):
 	"""Fills item data fields from it's name"""
-	string = item['name']
+	string = _item.get('name')
+	if not string:
+		return _item
 
 	for attr_name in ['currency', 'abv',
 			'cask_no', 'size', 'vintage', 'age']:
 		fn = getattr(parsers, attr_name)
-		if item.get(attr_name) is not None:
-			item[attr_name] = fn(string)
+		if _item.get(attr_name) is None:
+			_item[attr_name] = fn(string)
 
-	if item.get('distillery') is None:
-		item['distillery'] = distillery_matcher(string)
+	if _item.get('distillery') is None:
+		_item['distillery'] = distillery_matcher(string)
 
-	return item
+	return _item
 
 
-class GrandWhiskyItem(WhiskyItem):
-	@staticmethod
-	def loads(response):
-		prefix = 'window.auction_data'
-		xpath = f'//script[contains(., {prefix})]/text()'
-		data = None
-		for found in response.xpath(xpath):
-			gotten = found.get()
-			if prefix in gotten:
-				data = gotten
-				break
-		if not data:
-			return
+def grand_whisky_search_result(response):
+	prefix = 'window.auction_data'
+	xpath = f'//script[contains(., {prefix})]/text()'
+	data = None
+	for found in response.xpath(xpath):
+		gotten = found.get()
+		if prefix in gotten:
+			data = gotten
+			break
+	if not data:
+		return
 
-		entries = data.split(';')
-		first = entries[0].strip()
-		obj = first[len(prefix) + len(' = '):]
-		loaded = json.loads(obj)
-		mapping = [
-				('name', 'name', ()),
-				#('url', 'url', ()),
-				('price', 'highest_bid', (parser.read_float,)),
-				#('currency', 'highest_bid', (parser.read_float,)),
-		]
+	entries = data.split('\n')
+	first = entries[1].strip().strip(';')
+	obj = first[len(prefix) + len(' = '):]
+	loaded = json.loads(obj)
+	mapping = [
+			('name', 'name', ()),
+			('url', 'url', ()),
+			('price', 'highest_bid', (parser.read_float,)),
+			('currency', 'highest_bid', (parser.read_float,)),
+	]
 
-		for entry in loaded:
-			loader = item.BaseLoader(item=GrandWhiskyItem())
+	for entry in loaded:
+		loader = item.BaseLoader(item=WhiskySearchResultItem())
 
-			for item_name, lookup, procs in mapping:
-				val = entry.get(lookup)
-				if val is not None:
-					loader.add_value(item_name, val, *procs)
+		for item_name, lookup, procs in mapping:
+			val = entry.get(lookup)
+			if val is not None:
+				loader.add_value(item_name, val, *procs)
 
-			yield loader.load_item()
+		loader.add_value('domain', entry.get('url'),
+			processors.TakeFirst(), lib.get_domain)
+		yield loader.load_item()
+
+
+def grand_whisky_item(response):
+	loader = item.BaseLoader(item=WhiskyItem(), response=response)
+	loader.add_xpath('name', '//*[@id="content"]/div[1]/div/h1/text()')
+	loader.add_css('origin', 'ul.lotProps > li:nth-child(3)::text')
+	loader.add_css('size', 'ul.lotProps > li:nth-child(5)::text', parsers.take_first_nonempty(parsers.size))
+	loader.add_css('abv', 'ul.lotProps > li:nth-child(7)', parsers.take_first_nonempty(parsers.abv))
+	loader.add_css('price', 'div.innerPriceWrap > div > span > span.USD.show')
+	return loader.load_item()
 
 
 class DekantaSearchResultItem(WhiskySearchResultItem):

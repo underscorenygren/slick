@@ -40,7 +40,7 @@ install: build up create down download-fixtures ## builds docker image and creat
 	@echo "installed"
 
 download-fixtures:  ## downloads test html files
-	python download_urls.py
+	python download_urls.py --missing
 
 build:  ## builds docker images
 	docker-compose build

@@ -36,3 +36,5 @@ class Whisky(model.BaseModel):
 	size = Column(Integer)
 	vintage = Column(Integer)
 	age = Column(Integer)
+	url = Column(String(512))
+	domain = Column(String(128))

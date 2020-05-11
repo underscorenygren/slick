@@ -241,6 +241,7 @@ def sqlalchemy_column_to_field(col, processors=None):
 
 	elif isinstance(_type, sqlalchemy.Unicode):
 		default_processors = [
+			parser.strip_tags,
 			parser.strip_whitespace]
 
 	elif isinstance(_type, sqlalchemy.Float):

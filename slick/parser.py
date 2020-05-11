@@ -14,13 +14,19 @@ def read_bool(value):
 
 
 def _strip_number(value):
-	return strip_whitespace(value).replace(',', '').replace("'", '')
+	repls = ('"', "'", "\n", ',')
+	for rep in repls:
+		value = value.replace(rep, '')
+	return strip_whitespace(value)
 
 
 def read_int(value):
 	"""reads string value as int. Handles , separators for large number and rounds floats with ."""
 	if not isinstance(value, str):
 		return value
+	if not value:
+		return 0
+
 	stripped = _strip_number(value)
 	reg = re.search(r'[.\d]+', stripped)
 	result = reg[0] if reg else stripped
@@ -34,8 +40,14 @@ def read_float(value):
 	"""reads string value as float. Handles , separators for large numbers"""
 	if not isinstance(value, str):
 		return value
+	if not value:
+		return 0.0
 	stripped = _strip_number(value)
 	return float(stripped)
+
+
+def read_string(value):
+	return str(value)
 
 
 # Cleaners

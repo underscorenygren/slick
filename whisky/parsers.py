@@ -40,6 +40,7 @@ def abv(txt):
 	regexs = [
 		(r'(\d+\.\d)+%', _tofloat),
 		(r'(\d+)%', _tofloat),
+		(r'(\d+\.\d)+', _tofloat),
 	]
 	for r, pp in regexs:
 		res = regex_proc(r, txt, postproc=pp)
@@ -51,6 +52,8 @@ def abv(txt):
 def cask_no(txt):
 	regexs = [
 		(r'Cask\s+?#([-\d]+)', None),
+		(r'Cask\s+No\.?#?([-\d]+)', None),
+		(r'#([-\d]+)', None),
 	]
 	for r, pp in regexs:
 		res = regex_proc(r, txt, postproc=pp)
@@ -116,3 +119,12 @@ def currency(txt):
 		return 'USD'
 	if u'円' in txt or u'¥' in txt:
 		return 'JPY'
+
+
+def take_first_nonempty(fn):
+	def _inner(vals):
+		for val in vals:
+			res = fn(val)
+			if res:
+				return res
+	return _inner

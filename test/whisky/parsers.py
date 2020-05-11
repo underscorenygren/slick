@@ -16,11 +16,13 @@ def test_abv_parser():
 	assert 40.0 == parsers.abv("40%")
 	assert 58.8 == parsers.abv("58.8%")
 	assert 58.8 == parsers.abv("Some Whisky at 58.8% alc")
+	assert 49.7 == parsers.abv('<li>\n                            <strong>Strength (%):</strong> 49.7\n                    </li>')
 
 
 def test_cask_no_parser():
 	assert "8421" == parsers.cask_no("Single Cask #8421")
 	assert "6355-04" == parsers.cask_no("2001 Exceptional Cask #6355-04 2019 Release")
+	assert "14" == parsers.cask_no("#14")
 
 
 def test_distillery_parser():

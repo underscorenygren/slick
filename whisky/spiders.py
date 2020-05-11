@@ -12,17 +12,25 @@ class GrandSpider(spider.DBMixin, scrapy.Spider):
 
 	name = "grand"
 	_item_classes = [
-			items.GrandWhiskyItem,
+			items.WhiskySearchResultItem,
+			items.WhiskyItem,
 	]
 
+	# https://www.thegrandwhiskyauction.com/live-auction/page-3
 	start_urls = [
-		'https://www.thegrandwhiskyauction.com/april-2020',
-		'https://www.thegrandwhiskyauction.com/february-2020',
-		'https://www.thegrandwhiskyauction.com/january-2020',
+		'https://www.thegrandwhiskyauction.com/live-auction',
+		#'https://www.thegrandwhiskyauction.com/april-2020',
+		#'https://www.thegrandwhiskyauction.com/february-2020',
+		#'https://www.thegrandwhiskyauction.com/january-2020',
 	]
 
 	def parse(self, response):
-		yield from items.GrandWhiskyItem.load(response)
+		for item in items.grand_whisky_search_result(response):
+			yield item
+			yield scrapy.Request(url=item['url'], callback=self.parse_whisky)
+
+	def parse_whisky(self, response):
+		yield items.grand_whisky_item(response)
 
 
 class DekantaSpider(spider.DBMixin, scrapy.Spider):
